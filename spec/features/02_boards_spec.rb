@@ -97,7 +97,7 @@ describe "/boards" do
 end
 
 describe "/boards/[ID]" do
-  it "has a 'Delete post' link if the user is the owner", points: 5 do
+  it "has a 'Delete post' link if the user is the owner", points: 0 do
     the_user = User.new
     the_user.email = "claire@example.com"
     the_user.password = "password"
