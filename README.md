@@ -1,9 +1,28 @@
-# Bulletin Board 1
+# Bulletin Board 2
+
+## Install Devise
 
 ```
-rails generate draft:resource board name:string
+rails generate devise:install
+```
+## Set a root route
+
+```ruby
+# config/routes.rb
+
+root "boards#index"
 ```
 
+## Generate user account
+
 ```
-rails generate draft:resource post title:string body:text expires_on:date board_id:integer
+rails generate devise user
+```
+
+## Set sign out to GET
+
+```
+# config/initializers/devise.rb, Line 269
+
+config.sign_out_via = :get
 ```
