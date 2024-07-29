@@ -1,25 +1,22 @@
-FROM buildpack-deps:focal
+FROM ubuntu:focal
 
 ### base ###
+ENV DEBIAN_FRONTEND=noninteractive
 RUN yes | unminimize \
     && apt-get install -yq \
+        curl \
+        wget \
         acl \
         zip \
         unzip \
         bash-completion \
         build-essential \
-        htop \
         jq \
-        less \
         locales \
         man-db \
-        nano \
         software-properties-common \
+        libpq-dev \
         sudo \
-        time \
-        vim \
-        multitail \
-        lsof \
     && locale-gen en_US.UTF-8 \
     && mkdir /var/lib/apt/dazzle-marks \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
@@ -84,8 +81,8 @@ COPY --chown=student:student Gemfile.lock /rails-template/Gemfile.lock
 RUN /bin/bash -l -c "bundle install"
 
 # Install Google Chrome
-RUN sudo apt-get update && sudo apt-get install -y libxss1
-RUN wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.198-1_amd64.deb && \
+RUN sudo apt-get update && sudo apt-get install -y libxss1 && sudo rm -rf /var/lib/atp/lists/*
+RUN wget https://mirror.cs.uchicago.edu/google-chrome/pool/main/g/google-chrome-stable/google-chrome-stable_114.0.5735.198-1_amd64.deb && \
     sudo apt-get install -y ./google-chrome-stable_114.0.5735.198-1_amd64.deb
 
 # Install Chromedriver (compatable with Google Chrome version)
@@ -133,14 +130,8 @@ USER student
 # Install graphviz (Rails ERD)
 RUN /bin/bash -l -c "sudo apt update && sudo apt install -y graphviz=2.42.2-3build2"
 
-# Install fuser (bin/server) and expect (web_git)
-RUN sudo apt install -y libpq-dev psmisc lsof expect
-
-# Install parity
-RUN wget -qO - https://apt.thoughtbot.com/thoughtbot.gpg.key | sudo apt-key add - \
-    && echo "deb http://apt.thoughtbot.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/thoughtbot.list \
-    && sudo apt-get update \
-    && sudo apt-get -y install parity=3.5.0-2
+# Install fuser (bin/server)
+RUN sudo apt install -y psmisc
 
 # Install Node and npm
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - \
@@ -153,16 +144,14 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - \
     && sudo apt-get install -y yarn \
     && sudo npm install -g n \
     && sudo n 18 \
-    && hash -r
+    && hash -r \
+    && sudo rm -rf /var/lib/apt/lists/*
 
 # Install Redis.
 RUN sudo apt-get update \
  && sudo apt-get install -y \
   redis-server=5:5.0.7-2ubuntu0.1 \
  && sudo rm -rf /var/lib/apt/lists/*
-
-# Install heroku-cli
-RUN /bin/bash -l -c "curl https://cli-assets.heroku.com/install.sh | sh"
 
 # Install flyyctl
 RUN /bin/bash -l -c "curl -L https://fly.io/install.sh | sh"
@@ -183,7 +172,8 @@ RUN git config --global push.default upstream \
     && git config --global alias.sla 'log --oneline --decorate --graph --all' \
     && git config --global alias.co 'checkout' \
     && git config --global alias.cob 'checkout -b' \
-    && git config --global --add --bool push.autoSetupRemote true
+    && git config --global --add --bool push.autoSetupRemote true \
+    && git config --global core.editor "code --wait"
 
 # Alias 'git' to 'g'
 # RUN echo 'export PATH="$PATH:$GITPOD_REPO_ROOT/bin"' >> ~/.bashrc
@@ -202,6 +192,10 @@ __git_complete g __git_main" >> ~/.bash_aliases
 # Alias bundle exec to be
 RUN echo "alias be='bundle exec'" >> ~/.bash_aliases
 # RUN sudo cp -r /home/student /home/gitpod && sudo chmod 777 /home/gitpod
+
+# Alias rake grade to grade
+RUN echo "alias grade='rake grade'" >> ~/.bash_aliases
+RUN echo "alias grade:reset_token='rake grade:reset_token'" >> ~/.bash_aliases
 
 # Add bin/rake to path for non-Rails projects
 RUN echo 'export PATH="$PWD/bin:$PATH"' >> ~/.bashrc
