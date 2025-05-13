@@ -57,6 +57,6 @@ class PostsController < ApplicationController
 
     the_post.destroy
 
-    redirect_to("/posts", { :notice => "Post deleted successfully."} )
+    redirect_to("/boards/#{the_post.board_id}", { :notice => "Post deleted successfully."} )
   end
 end

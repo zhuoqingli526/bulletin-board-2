@@ -6,9 +6,10 @@
   </div>
 </div>
 <% matching_users = User.where({ :id => @the_board.user_id})%>
-<% the_user = matching_users.first%>
+<% the_owner = matching_users.first%>
+<% owner_email = the_owner.email%>
 
-<p>Owner: <%= the_user.email%>
+<p>Owner: <%= owner_email %>
 
 <hr>
 
@@ -71,12 +72,16 @@
 
   <% @active_posts.each do |a_post| %>
     <tr>
-      <td><%= a_post.title %></td>
-      <td><%= a_post.body %></td>
       <% matching_users = User.where({ :id => a_post.user_id})%>
       <% the_user = matching_users.first%>
-
-      <td><%= the_user.email%></td>
+      <% user_email = the_user.email%>
+      <% if user_email == current_user.email %>
+        <td><%= a_post.title %> <a href = "/delete_post/<%= a_post.id%>">Delete post</a></td>
+      <% else %>
+         <td><%= a_post.title %></td>
+      <% end %>
+      <td><%= a_post.body %></td>
+      <td><%= user_email %></td>
       <td><%= a_post.created_at.strftime("%b %e, %Y") %></td>
       <td><%= a_post.expires_on.strftime("%b %e, %Y") %></td>
     </tr>
@@ -96,11 +101,16 @@
 
   <% @expired_posts.each do |a_post| %>
     <tr>
-      <td><%= a_post.title %></td>
-      <td><%= a_post.body %></td>
       <% matching_users = User.where({ :id => a_post.user_id})%>
       <% the_user = matching_users.first%>
+      <% user_email = the_user.email%>
+      <% if user_email == current_user.email %>
+        <td><%= a_post.title %> <a href = "/delete_post/<%= a_post.id%>">Delete post</a></td>
+      <% else %>
+         <td><%= a_post.title %></td>
+      <% end %>
 
+      <td><%= a_post.body %></td>
       <td><%= the_user.email%></td>
       <td><%= a_post.created_at.strftime("%b %e, %Y") %></td>
       <td><%= a_post.expires_on.strftime("%b %e, %Y") %></td>
